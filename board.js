@@ -773,38 +773,3 @@ function setCrossingCount(numCrossings,boardSize) {
 
 
 
-
-//=== Sweep table: n = 80, 90, ..., 1000 ===
-function renderSweepTable() {
-  let wrap = document.getElementById('sweep-table-wrap');
-  if (!wrap) return;
-  let html = '<table><thead><tr>';
-  html += '<th>$n$</th><th>$\\chi(\\textsc{Gen}(n,n))$<br>(BJMOW)</th>';
-  html += '<th>$\\chi(T_n)$<br>(patched)</th>';
-  html += '<th>saving</th>';
-  html += '<th>$\\chi(T_n)/n$</th>';
-  html += '<th>$\\chi(T_n) - 11.5\\, n$</th>';
-  html += '</tr></thead><tbody>';
-  for (let n = 80; n <= 1000; n += 10) {
-    let to = genTour(n, n);
-    let tp = genTourPatched(n, n);
-    if (!to || !tp) continue;
-    let xo = numCrossings(to);
-    let xp = numCrossings(tp);
-    let saving = xo - xp;
-    let ratio = (xp / n).toFixed(4);
-    let residual = (xp - 11.5 * n).toFixed(1);
-    html += '<tr>';
-    html += '<td>' + n + '</td>';
-    html += '<td>' + xo + '</td>';
-    html += '<td>' + xp + '</td>';
-    html += '<td class="saving">' + saving + '</td>';
-    html += '<td>' + ratio + '</td>';
-    html += '<td>' + residual + '</td>';
-    html += '</tr>';
-  }
-  html += '</tbody></table>';
-  wrap.innerHTML = html;
-  if (window.MathJax && MathJax.Hub) MathJax.Hub.Queue(['Typeset', MathJax.Hub, wrap]);
-}
-renderSweepTable();

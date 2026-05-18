@@ -130,7 +130,112 @@ body { padding-top: 0px; font-family: sans-serif; }
   <h3 style="text-align:center; margin-top:24px;">
     Crossing counts for $n = 80, 90, \ldots, 1000$
   </h3>
-  <div id="sweep-table-wrap"></div>
+  <table>
+  <thead><tr>
+    <th>$n$</th>
+    <th>$\chi(\textsc{Gen}(n,n))$<br>BJMOW</th>
+    <th>$\chi(T_n)$<br>patched</th>
+    <th>saving</th>
+    <th>$\chi(T_n)/n$</th>
+    <th>$\chi(T_n) - 11.5\, n$</th>
+  </tr></thead>
+  <tbody>
+<tr><td>80</td><td>1040</td><td>980</td><td class="saving">60</td><td>12.2500</td><td>+60.0</td></tr>
+<tr><td>90</td><td>1152</td><td>1062</td><td class="saving">90</td><td>11.8000</td><td>+27.0</td></tr>
+<tr><td>100</td><td>1289</td><td>1169</td><td class="saving">120</td><td>11.6900</td><td>+19.0</td></tr>
+<tr><td>110</td><td>1414</td><td>1294</td><td class="saving">120</td><td>11.7636</td><td>+29.0</td></tr>
+<tr><td>120</td><td>1560</td><td>1440</td><td class="saving">120</td><td>12.0000</td><td>+60.0</td></tr>
+<tr><td>130</td><td>1672</td><td>1522</td><td class="saving">150</td><td>11.7077</td><td>+27.0</td></tr>
+<tr><td>140</td><td>1809</td><td>1629</td><td class="saving">180</td><td>11.6357</td><td>+19.0</td></tr>
+<tr><td>150</td><td>1934</td><td>1754</td><td class="saving">180</td><td>11.6933</td><td>+29.0</td></tr>
+<tr><td>160</td><td>2080</td><td>1900</td><td class="saving">180</td><td>11.8750</td><td>+60.0</td></tr>
+<tr><td>170</td><td>2192</td><td>1982</td><td class="saving">210</td><td>11.6588</td><td>+27.0</td></tr>
+<tr><td>180</td><td>2329</td><td>2089</td><td class="saving">240</td><td>11.6056</td><td>+19.0</td></tr>
+<tr><td>190</td><td>2454</td><td>2214</td><td class="saving">240</td><td>11.6526</td><td>+29.0</td></tr>
+<tr><td>200</td><td>2600</td><td>2360</td><td class="saving">240</td><td>11.8000</td><td>+60.0</td></tr>
+<tr><td>210</td><td>2712</td><td>2442</td><td class="saving">270</td><td>11.6286</td><td>+27.0</td></tr>
+<tr><td>220</td><td>2849</td><td>2549</td><td class="saving">300</td><td>11.5864</td><td>+19.0</td></tr>
+<tr><td>230</td><td>2974</td><td>2674</td><td class="saving">300</td><td>11.6261</td><td>+29.0</td></tr>
+<tr><td>240</td><td>3120</td><td>2820</td><td class="saving">300</td><td>11.7500</td><td>+60.0</td></tr>
+<tr><td>250</td><td>3232</td><td>2902</td><td class="saving">330</td><td>11.6080</td><td>+27.0</td></tr>
+<tr><td>260</td><td>3369</td><td>3009</td><td class="saving">360</td><td>11.5731</td><td>+19.0</td></tr>
+<tr><td>270</td><td>3494</td><td>3134</td><td class="saving">360</td><td>11.6074</td><td>+29.0</td></tr>
+<tr><td>280</td><td>3640</td><td>3280</td><td class="saving">360</td><td>11.7143</td><td>+60.0</td></tr>
+<tr><td>290</td><td>3752</td><td>3362</td><td class="saving">390</td><td>11.5931</td><td>+27.0</td></tr>
+<tr><td>300</td><td>3889</td><td>3469</td><td class="saving">420</td><td>11.5633</td><td>+19.0</td></tr>
+<tr><td>310</td><td>4014</td><td>3594</td><td class="saving">420</td><td>11.5935</td><td>+29.0</td></tr>
+<tr><td>320</td><td>4160</td><td>3740</td><td class="saving">420</td><td>11.6875</td><td>+60.0</td></tr>
+<tr><td>330</td><td>4272</td><td>3822</td><td class="saving">450</td><td>11.5818</td><td>+27.0</td></tr>
+<tr><td>340</td><td>4409</td><td>3929</td><td class="saving">480</td><td>11.5559</td><td>+19.0</td></tr>
+<tr><td>350</td><td>4534</td><td>4054</td><td class="saving">480</td><td>11.5829</td><td>+29.0</td></tr>
+<tr><td>360</td><td>4680</td><td>4200</td><td class="saving">480</td><td>11.6667</td><td>+60.0</td></tr>
+<tr><td>370</td><td>4792</td><td>4282</td><td class="saving">510</td><td>11.5730</td><td>+27.0</td></tr>
+<tr><td>380</td><td>4929</td><td>4389</td><td class="saving">540</td><td>11.5500</td><td>+19.0</td></tr>
+<tr><td>390</td><td>5054</td><td>4514</td><td class="saving">540</td><td>11.5744</td><td>+29.0</td></tr>
+<tr><td>400</td><td>5200</td><td>4660</td><td class="saving">540</td><td>11.6500</td><td>+60.0</td></tr>
+<tr><td>410</td><td>5312</td><td>4742</td><td class="saving">570</td><td>11.5659</td><td>+27.0</td></tr>
+<tr><td>420</td><td>5449</td><td>4849</td><td class="saving">600</td><td>11.5452</td><td>+19.0</td></tr>
+<tr><td>430</td><td>5574</td><td>4974</td><td class="saving">600</td><td>11.5674</td><td>+29.0</td></tr>
+<tr><td>440</td><td>5720</td><td>5120</td><td class="saving">600</td><td>11.6364</td><td>+60.0</td></tr>
+<tr><td>450</td><td>5832</td><td>5202</td><td class="saving">630</td><td>11.5600</td><td>+27.0</td></tr>
+<tr><td>460</td><td>5969</td><td>5309</td><td class="saving">660</td><td>11.5413</td><td>+19.0</td></tr>
+<tr><td>470</td><td>6094</td><td>5434</td><td class="saving">660</td><td>11.5617</td><td>+29.0</td></tr>
+<tr><td>480</td><td>6240</td><td>5580</td><td class="saving">660</td><td>11.6250</td><td>+60.0</td></tr>
+<tr><td>490</td><td>6352</td><td>5662</td><td class="saving">690</td><td>11.5551</td><td>+27.0</td></tr>
+<tr><td>500</td><td>6489</td><td>5769</td><td class="saving">720</td><td>11.5380</td><td>+19.0</td></tr>
+<tr><td>510</td><td>6614</td><td>5894</td><td class="saving">720</td><td>11.5569</td><td>+29.0</td></tr>
+<tr><td>520</td><td>6760</td><td>6040</td><td class="saving">720</td><td>11.6154</td><td>+60.0</td></tr>
+<tr><td>530</td><td>6872</td><td>6122</td><td class="saving">750</td><td>11.5509</td><td>+27.0</td></tr>
+<tr><td>540</td><td>7009</td><td>6229</td><td class="saving">780</td><td>11.5352</td><td>+19.0</td></tr>
+<tr><td>550</td><td>7134</td><td>6354</td><td class="saving">780</td><td>11.5527</td><td>+29.0</td></tr>
+<tr><td>560</td><td>7280</td><td>6500</td><td class="saving">780</td><td>11.6071</td><td>+60.0</td></tr>
+<tr><td>570</td><td>7392</td><td>6582</td><td class="saving">810</td><td>11.5474</td><td>+27.0</td></tr>
+<tr><td>580</td><td>7529</td><td>6689</td><td class="saving">840</td><td>11.5328</td><td>+19.0</td></tr>
+<tr><td>590</td><td>7654</td><td>6814</td><td class="saving">840</td><td>11.5492</td><td>+29.0</td></tr>
+<tr><td>600</td><td>7800</td><td>6960</td><td class="saving">840</td><td>11.6000</td><td>+60.0</td></tr>
+<tr><td>610</td><td>7912</td><td>7042</td><td class="saving">870</td><td>11.5443</td><td>+27.0</td></tr>
+<tr><td>620</td><td>8049</td><td>7149</td><td class="saving">900</td><td>11.5306</td><td>+19.0</td></tr>
+<tr><td>630</td><td>8174</td><td>7274</td><td class="saving">900</td><td>11.5460</td><td>+29.0</td></tr>
+<tr><td>640</td><td>8320</td><td>7420</td><td class="saving">900</td><td>11.5938</td><td>+60.0</td></tr>
+<tr><td>650</td><td>8432</td><td>7502</td><td class="saving">930</td><td>11.5415</td><td>+27.0</td></tr>
+<tr><td>660</td><td>8569</td><td>7609</td><td class="saving">960</td><td>11.5288</td><td>+19.0</td></tr>
+<tr><td>670</td><td>8694</td><td>7734</td><td class="saving">960</td><td>11.5433</td><td>+29.0</td></tr>
+<tr><td>680</td><td>8840</td><td>7880</td><td class="saving">960</td><td>11.5882</td><td>+60.0</td></tr>
+<tr><td>690</td><td>8952</td><td>7962</td><td class="saving">990</td><td>11.5391</td><td>+27.0</td></tr>
+<tr><td>700</td><td>9089</td><td>8069</td><td class="saving">1020</td><td>11.5271</td><td>+19.0</td></tr>
+<tr><td>710</td><td>9214</td><td>8194</td><td class="saving">1020</td><td>11.5408</td><td>+29.0</td></tr>
+<tr><td>720</td><td>9360</td><td>8340</td><td class="saving">1020</td><td>11.5833</td><td>+60.0</td></tr>
+<tr><td>730</td><td>9472</td><td>8422</td><td class="saving">1050</td><td>11.5370</td><td>+27.0</td></tr>
+<tr><td>740</td><td>9609</td><td>8529</td><td class="saving">1080</td><td>11.5257</td><td>+19.0</td></tr>
+<tr><td>750</td><td>9734</td><td>8654</td><td class="saving">1080</td><td>11.5387</td><td>+29.0</td></tr>
+<tr><td>760</td><td>9880</td><td>8800</td><td class="saving">1080</td><td>11.5789</td><td>+60.0</td></tr>
+<tr><td>770</td><td>9992</td><td>8882</td><td class="saving">1110</td><td>11.5351</td><td>+27.0</td></tr>
+<tr><td>780</td><td>10129</td><td>8989</td><td class="saving">1140</td><td>11.5244</td><td>+19.0</td></tr>
+<tr><td>790</td><td>10254</td><td>9114</td><td class="saving">1140</td><td>11.5367</td><td>+29.0</td></tr>
+<tr><td>800</td><td>10400</td><td>9260</td><td class="saving">1140</td><td>11.5750</td><td>+60.0</td></tr>
+<tr><td>810</td><td>10512</td><td>9342</td><td class="saving">1170</td><td>11.5333</td><td>+27.0</td></tr>
+<tr><td>820</td><td>10649</td><td>9449</td><td class="saving">1200</td><td>11.5232</td><td>+19.0</td></tr>
+<tr><td>830</td><td>10774</td><td>9574</td><td class="saving">1200</td><td>11.5349</td><td>+29.0</td></tr>
+<tr><td>840</td><td>10920</td><td>9720</td><td class="saving">1200</td><td>11.5714</td><td>+60.0</td></tr>
+<tr><td>850</td><td>11032</td><td>9802</td><td class="saving">1230</td><td>11.5318</td><td>+27.0</td></tr>
+<tr><td>860</td><td>11169</td><td>9909</td><td class="saving">1260</td><td>11.5221</td><td>+19.0</td></tr>
+<tr><td>870</td><td>11294</td><td>10034</td><td class="saving">1260</td><td>11.5333</td><td>+29.0</td></tr>
+<tr><td>880</td><td>11440</td><td>10180</td><td class="saving">1260</td><td>11.5682</td><td>+60.0</td></tr>
+<tr><td>890</td><td>11552</td><td>10262</td><td class="saving">1290</td><td>11.5303</td><td>+27.0</td></tr>
+<tr><td>900</td><td>11689</td><td>10369</td><td class="saving">1320</td><td>11.5211</td><td>+19.0</td></tr>
+<tr><td>910</td><td>11814</td><td>10494</td><td class="saving">1320</td><td>11.5319</td><td>+29.0</td></tr>
+<tr><td>920</td><td>11960</td><td>10640</td><td class="saving">1320</td><td>11.5652</td><td>+60.0</td></tr>
+<tr><td>930</td><td>12072</td><td>10722</td><td class="saving">1350</td><td>11.5290</td><td>+27.0</td></tr>
+<tr><td>940</td><td>12209</td><td>10829</td><td class="saving">1380</td><td>11.5202</td><td>+19.0</td></tr>
+<tr><td>950</td><td>12334</td><td>10954</td><td class="saving">1380</td><td>11.5305</td><td>+29.0</td></tr>
+<tr><td>960</td><td>12480</td><td>11100</td><td class="saving">1380</td><td>11.5625</td><td>+60.0</td></tr>
+<tr><td>970</td><td>12592</td><td>11182</td><td class="saving">1410</td><td>11.5278</td><td>+27.0</td></tr>
+<tr><td>980</td><td>12729</td><td>11289</td><td class="saving">1440</td><td>11.5194</td><td>+19.0</td></tr>
+<tr><td>990</td><td>12854</td><td>11414</td><td class="saving">1440</td><td>11.5293</td><td>+29.0</td></tr>
+<tr><td>1000</td><td>13000</td><td>11560</td><td class="saving">1440</td><td>11.5600</td><td>+60.0</td></tr>
+  </tbody>
+</table>
+
 </div>
 
 <!-- Description -->
