@@ -3,9 +3,9 @@
 //rest by Nil M.
 
 //X grows to the right and Y grows upwards(?)
-var canvasSize = (document.getElementById('canvas_orig') || document.getElementById('canvas1')).offsetWidth-2;  //LI 2026: fallback for both layouts
+var canvasSize = (document.getElementById('canvas_orig') || document.getElementById('canvas1')).offsetWidth-2;
 var canvasOffset = 1;
-var maxCanvasSize = 700;
+var maxCanvasSize = canvasSize;   //fit drawing to the actual canvas width
 var maxCellSize = 30;
 
 //HTML canvas coordinate system:
@@ -86,11 +86,11 @@ var Sequence1 = [ //8x4 (heel)
 '02 27 25 25 26 26 56 56',
 '01 17 06 67 16 16 06 67'];
 
-//=== PATCH ADDITION (Li 2026): SequenceP_40 template ===
+//=== PATCH ADDITION: SequenceP_40 template ===
 //4 x 40 pairing-preserving template found by CP-SAT search.
 //Replaces 5 adjacent Sequence1's; saves 30 crossings per substitution.
-//See https://shisheng.li/f8a-ex161/arxiv/ex161.pdf for the proof
-//that this preserves Hamilton property (interface-preserving substitution).
+//Cross-boundary edges, boundary endpoints, and internal-path pairing
+//all match 5 x Sequence1*, so BJMOW Theorem 2 applies verbatim.
 var SequenceP40 = [ //40 x 4
 '26 26 26 26 36 26 26 26 26 26 26 36 36 36 36 26 36 26 26 26 36 26 26 26 26 26 26 36 36 36 36 26 36 26 26 26 26 26 26 26',
 '36 46 56 56 26 26 23 46 46 46 46 56 56 45 34 34 34 36 23 26 26 26 23 46 46 46 46 56 56 45 34 34 34 36 23 26 26 26 36 46',
@@ -281,7 +281,7 @@ CanvasState.prototype.draw = function() {
 var CS_orig    = new CanvasState(document.getElementById('canvas_orig'),
                                  genTour,        'BJMOW original');
 var CS_patched = new CanvasState(document.getElementById('canvas_patched'),
-                                 genTourPatched, 'With Li 2026 patch');
+                                 genTourPatched, 'With SequenceP_40 patch');
 init();
 
 function init() {

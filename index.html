@@ -1,16 +1,16 @@
 <!--
-Interactive visualisation of BJMOW's knight's tour algorithm AND the
-Li 2026 patched version, side by side.
+Interactive visualisation of BJMOW's knight's tour algorithm and a
+patched variant, side by side.
 
 Original by Nil Mamano (https://github.com/nmamano/MinCrossingsKnightsTour)
-This fork: Shisheng Li (May 2026) — adds SequenceP_40 patch.
+This fork adds the SequenceP_40 patch.
 -->
 
 <!DOCTYPE html>
 <html>
 <head>
 
-<title>Knight's Tour: BJMOW vs Li 2026 patch</title>
+<title>Knight's Tour: BJMOW vs SequenceP_40 patch</title>
 <meta charset="utf-8">
 <meta name="author" content="Nil Mamano + Shisheng Li">
 <meta name="description" content="knightstour patch">
@@ -71,7 +71,7 @@ body { padding-top: 0px; font-family: sans-serif; }
 <div class="w3-card">
   <div class="w3-bar w3-white w3-wide w3-padding w3-card">
     <a href="#home" class="w3-bar-item w3-button">
-      <b>Taming the Knight's Tour:</b> BJMOW algorithm vs.\ Li 2026 patch
+      <b>Taming the Knight's Tour:</b> BJMOW algorithm vs.\ SequenceP_40 patch
     </a>
     <div class="w3-right w3-hide-small">
       <a href="#about" class="w3-bar-item w3-button">About</a>
@@ -122,11 +122,11 @@ body { padding-top: 0px; font-family: sans-serif; }
       <b>Left:</b> BJMOW Algorithm 1
       (<a href="https://arxiv.org/abs/1904.02824">Besa et al., 2022</a>).
       <br>
-      <b>Right:</b> the same algorithm with a single-element patch:
-      five adjacent $4\times8$ <code>Sequence1</code> heel templates
-      are replaced, in groups of five, by a single $4\times40$
-      <code>SequenceP_40</code> template
-      (<a href="https://shisheng.li/f8a-ex161/arxiv/ex161.pdf">Li 2026</a>).
+      <b>Right:</b> the same algorithm with a single-element patch
+      in this fork: five adjacent $4\times8$ <code>Sequence1</code>
+      heel templates are replaced, in groups of five, by a single
+      $4\times40$ <code>SequenceP_40</code> template found by
+      CP-SAT search.
       <br>
       The red rectangles on the right canvas mark the
       <b>only cells that differ</b> between the two tours;
@@ -150,23 +150,19 @@ body { padding-top: 0px; font-family: sans-serif; }
     gave the first $O(1)$-constant upper bound on the number of crossings:
     $\chi(T_n) \le 12n + O(1)$ asymptotically.</p>
 
-  <p>This fork adds Li's 2026 patch:
-    <a href="https://shisheng.li/f8a-ex161/arxiv/ex161.pdf">
-      <em>A crossing-reducing patch to BJMOW's closed knight's tour algorithm</em></a>.
-    A $4 \times 40$ pairing-preserving template
-    <code>SequenceP_40</code>, found by CP-SAT search, replaces
-    five adjacent $4 \times 8$ <code>Sequence1</code> heels and
-    preserves the cross-boundary edge interface; BJMOW's
-    Hamilton-property proof (their Theorem 2) therefore applies
-    verbatim to the patched tour.  The crossing constant drops
-    asymptotically from $12$ to $11.5$.</p>
+  <p>This fork adds a single-element <code>SequenceP_40</code> patch
+    in <code>board.js</code>: a $4 \times 40$ pairing-preserving template
+    found by CP-SAT search.  It replaces five adjacent $4 \times 8$
+    <code>Sequence1</code> heel templates and preserves the cross-boundary
+    edge interface; BJMOW's Hamilton-property proof
+    (their Theorem 2) therefore applies verbatim to the patched tour.
+    The crossing constant drops asymptotically from $12$ to $11.5$.</p>
 
   <p><em>Original demo</em> by Juan Jose Besa Vidal, Timothy Johnson,
     Nil Mamano, and Martha Osegueda
     (<a href="https://github.com/nmamano/MinCrossingsKnightsTour">upstream repo</a>).
-    <em>This fork's patch</em> by
-    Shisheng Li (<a href="mailto:shisheng@mail.ustc.edu.cn">shisheng@mail.ustc.edu.cn</a>).
-    Source: <a href="https://github.com/daizisheng/MinCrossingsKnightsTour">github.com/daizisheng/MinCrossingsKnightsTour</a>.</p>
+    Source for this fork:
+    <a href="https://github.com/daizisheng/MinCrossingsKnightsTour">github.com/daizisheng/MinCrossingsKnightsTour</a>.</p>
 </div>
 
 </body>
