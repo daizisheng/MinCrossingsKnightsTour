@@ -1,5 +1,5 @@
 --- /tmp/MinCrossingsKnightsTour/board.js	2026-05-18 19:37:44.898185953 +0800
-+++ board.js	2026-05-18 20:23:37.869909814 +0800
++++ board.js	2026-05-18 20:27:52.668859488 +0800
 @@ -3,9 +3,9 @@
  //rest by Nil M.
  
@@ -136,8 +136,8 @@
 +
 +function fitCanvas() {
 +  let canvas = document.getElementById('canvas_main');
-+  let size = Math.floor(Math.min(window.innerWidth * 0.9,
-+                                 window.innerHeight * 0.85));
++  //fill ~90% of the page width; height matches (square board)
++  let size = Math.floor(window.innerWidth * 0.9);
 +  canvas.width = size;
 +  canvas.height = size;
 +  if (typeof CS !== 'undefined' && CS) {

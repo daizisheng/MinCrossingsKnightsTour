@@ -282,8 +282,8 @@ window.addEventListener('resize', () => { fitCanvas(); if (CS) CS.valid = false;
 
 function fitCanvas() {
   let canvas = document.getElementById('canvas_main');
-  let size = Math.floor(Math.min(window.innerWidth * 0.9,
-                                 window.innerHeight * 0.85));
+  //fill ~90% of the page width; height matches (square board)
+  let size = Math.floor(window.innerWidth * 0.9);
   canvas.width = size;
   canvas.height = size;
   if (typeof CS !== 'undefined' && CS) {
