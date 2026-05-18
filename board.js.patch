@@ -1,0 +1,296 @@
+--- /tmp/MinCrossingsKnightsTour/board.js	2026-05-18 19:37:44.898185953 +0800
++++ board.js	2026-05-18 19:50:04.789096152 +0800
+@@ -3,7 +3,7 @@
+ //rest by Nil M.
+ 
+ //X grows to the right and Y grows upwards(?)
+-var canvasSize = document.getElementById('canvas1').offsetWidth-2;
++var canvasSize = (document.getElementById('canvas_orig') || document.getElementById('canvas1')).offsetWidth-2;  //LI 2026: fallback for both layouts
+ var canvasOffset = 1;
+ var maxCanvasSize = 700;
+ var maxCellSize = 30;
+@@ -86,6 +86,18 @@
+ '02 27 25 25 26 26 56 56',
+ '01 17 06 67 16 16 06 67'];
+ 
++//=== PATCH ADDITION (Li 2026): SequenceP_40 template ===
++//4 x 40 pairing-preserving template found by CP-SAT search.
++//Replaces 5 adjacent Sequence1's; saves 30 crossings per substitution.
++//See https://shisheng.li/f8a-ex161/arxiv/ex161.pdf for the proof
++//that this preserves Hamilton property (interface-preserving substitution).
++var SequenceP40 = [ //40 x 4
++'26 26 26 26 36 26 26 26 26 26 26 36 36 36 36 26 36 26 26 26 36 26 26 26 26 26 26 36 36 36 36 26 36 26 26 26 26 26 26 26',
++'36 46 56 56 26 26 23 46 46 46 46 56 56 45 34 34 34 36 23 26 26 26 23 46 46 46 46 56 56 45 34 34 34 36 23 26 26 26 36 46',
++'12 12 25 25 25 57 56 56 26 12 15 15 57 57 57 57 25 27 25 25 26 67 56 56 26 12 15 15 57 57 57 57 25 27 25 25 26 26 56 56',
++'01 17 16 16 16 16 06 07 01 01 16 16 01 01 01 07 17 17 67 67 16 16 06 07 01 01 16 16 01 01 01 07 17 17 67 67 16 16 06 67'];
++//=== END PATCH ADDITION ===
++
+ var Sequence0 = [ //6x4
+ '36 46 26 26 36 46',
+ '36 46 23 24 36 46',
+@@ -116,10 +128,13 @@
+ 
+ 
+ 
+-function CanvasState(canvas) {
++function CanvasState(canvas, tourFn, label) {
+ 
+   // **** First some setup! ****
+   this.canvas = canvas;
++  this.tourFn = tourFn || genTour;   //LI 2026: which algorithm
++  this.label = label || '';          //LI 2026: label shown on canvas
++  this.patchRegions = [];            //LI 2026: red rectangles overlaid on draw
+   this.width = canvas.width;
+   this.height = canvas.height;
+   this.ctx = canvas.getContext('2d');
+@@ -141,7 +156,7 @@
+   // **** Keep track of state! ****
+ 
+   this.valid = false; // when set to false, the canvas will redraw everything
+-  this.tour = genTour(30, 30);
++  this.tour = this.tourFn(30, 30);
+ 
+   // **** Then events! ****
+ 
+@@ -236,6 +251,24 @@
+     }
+   }
+ 
++
++  // === LI 2026 PATCH: draw red overlays on patch regions ===
++  ctx.strokeStyle = '#cc0000';
++  ctx.lineWidth = 3;
++  for (let r of this.patchRegions) {
++    let x0 = canvasOffset + canvasCellSize * r.j0;
++    let y0 = canvasOffset + canvasCellSize * r.i0;
++    let w0 = canvasCellSize * (r.j1 - r.j0 + 1);
++    let h0 = canvasCellSize * (r.i1 - r.i0 + 1);
++    ctx.strokeRect(x0, y0, w0, h0);
++  }
++  if (this.label) {
++    ctx.fillStyle = '#222';
++    ctx.font = 'bold 16px sans-serif';
++    ctx.fillText(this.label, 10, 22);
++  }
++  // === END PATCH OVERLAY ===
++
+   // ** Add stuff you want drawn on top all the time here **
+   this.valid = true;
+ }
+@@ -244,15 +277,61 @@
+ //HTML interaction
+ ////////////////////////////////////
+ 
+-var CS = new CanvasState(document.getElementById('canvas1'));
++//=== LI 2026: two canvases, one BJMOW original, one with our patch ===
++var CS_orig    = new CanvasState(document.getElementById('canvas_orig'),
++                                 genTour,        'BJMOW original');
++var CS_patched = new CanvasState(document.getElementById('canvas_patched'),
++                                 genTourPatched, 'With Li 2026 patch');
+ init();
+ 
+ function init() {
+-  CS.valid = false;
+-  let tour = genTour(30, 30);
+-  setTurnCount(numTurns(tour),tour.length);
+-  setCrossingCount(numCrossings(tour),tour.length);
++  refreshBoth(30, 30);
++}
++
++function refreshBoth(width, height) {
++  let to = CS_orig.tourFn(width, height);
++  let tp = CS_patched.tourFn(width, height);
++  if (to === undefined || tp === undefined) return;
++  CS_orig.tour = to;
++  CS_orig.patchRegions = [];
++  CS_orig.valid = false;
++  CS_patched.tour = tp;
++  CS_patched.patchRegions = getPatchRegions(width, height);
++  CS_patched.valid = false;
++  let xo = numCrossings(to), xp = numCrossings(tp);
++  setLabelById('crossingcount_orig',
++               'Crossings: ' + xo + '  (BJMOW default heel = 13n+\u03B4)');
++  setLabelById('crossingcount_patched',
++               'Crossings: ' + xp + '  (saving ' + (xo - xp) + ' vs BJMOW)');
++  setLabelById('turncount_orig',    'Turns: ' + numTurns(to));
++  setLabelById('turncount_patched', 'Turns: ' + numTurns(tp));
++}
++
++function setLabelById(id, text) {
++  let el = document.getElementById(id);
++  if (el) el.innerHTML = text;
++}
++
++function getPatchRegions(width, height) {
++  if (width < 50 || height < 12) return [];
++  let regions = [];
++  let BRSeq = (width / 2 + 2) % 4;
++  let TLSeq = (((3 - height) % 4) + 4) % 4;
++  let finalj_bot = [width-6, width-8, width-10, width-4][BRSeq];
++  let start_top  = [6, 8, 10, 4][TLSeq];
++  let j = 6;
++  while (j + 40 <= finalj_bot) {
++    regions.push({i0: height-4, i1: height-1, j0: j, j1: j+39});
++    j += 40;
++  }
++  j = start_top;
++  while (j + 40 <= width - 8) {
++    regions.push({i0: 0, i1: 3, j0: j, j1: j+39});
++    j += 40;
++  }
++  return regions;
+ }
++//=== END LI 2026 init block ===
+ 
+ //Algorithm 1 in the paper
+ function genTour(width, height) {
+@@ -361,6 +440,122 @@
+   return tour;
+ }
+ 
++//=== LI 2026 PATCH: Algorithm 1 modified by inserting greedy SequenceP_40 placements ===
++//Identical to BJMOW genTour above except for two extra while-loops marked LI PATCH.
++function genTourPatched(width, height) {
++  if (width < 16 || width % 2 != 0 || height < 12) {
++    alert("width should be >=16 and even. height should be >=12");
++    return;
++  }
++
++  let BRSeq = (width/2+2)%4; //bottom-right corner Sequence
++  let TLSeq = (((3-height)%4)+4)%4; //top-left corner Sequence
++  let TRHeight = 5+((width/2+height-1)%4); //top-right corner junction height
++
++  let tour = emptyTour(width, height);
++
++  //Left side
++  let i = height-7;
++  while (i >= 0) {
++    addPiece(tour, i, 0, VerticalEdge);
++    i -= 4;
++  }
++  //Right side
++  switch(BRSeq) {
++    case 0: i = height - 8;
++      break;
++    case 1: i = height - 7;
++      break;
++    case 2: i = height - 10;
++      break;
++    case 3: i = height - 9;
++      break;
++    default: alert("bug");
++  }
++  while (i >= 0) {
++    addPiece(tour, i, width-2, rotate180(VerticalEdge));
++    i -= 4;
++  }
++  //Bottom Side
++  addPiece(tour, height-5, 0, CornerHMatchHeight5);
++  let j = 6;
++  let finalj;
++  switch(BRSeq) {
++    case 0: finalj = width - 6;
++      break;
++    case 1: finalj = width - 8;
++      break;
++    case 2: finalj = width - 10;
++      break;
++    case 3: finalj = width - 4;
++      break;
++    default: alert("bug");
++  }
++  while (j + 40 <= finalj) {                            //LI 2026 PATCH (bottom band)
++    addPiece(tour, height-4, j, SequenceP40);
++    j += 40;
++  }
++  while (j < finalj) {
++    addPiece(tour, height-4, j, Sequence1);
++    j += 8;
++  }
++  switch(BRSeq) {
++    case 0: addPiece(tour, height-4, j, Sequence0);
++      break;
++    case 1: addPiece(tour, height-4, j, Sequence1);
++      break;
++    case 2:
++      addPiece(tour, height-4, j, Sequence0);
++      addPiece(tour, height-6, j+6, Sequence2part2);
++      break;
++    case 3: addPiece(tour, height-5, j, Sequence3);
++      break;
++    default: alert("bug");
++  }
++  // Top Side
++  switch(TLSeq) {
++    case 0:
++      addPiece(tour, 0, 0, rotate180(Sequence0));
++      j = 6;
++      break;
++    case 1:
++      addPiece(tour, 0, 0, rotate180(Sequence1));
++      j = 8;
++      break;
++    case 2:
++      addPiece(tour, 0, 0, rotate180(Sequence2part2));
++      addPiece(tour, 0, 4, rotate180(Sequence0));
++      j = 10;
++      break;
++    case 3:
++      addPiece(tour, 0, 0, rotate180(Sequence3));
++      j = 4;
++      break;
++    default: alert("bug");
++  }
++  while (j + 40 <= width-8) {                           //LI 2026 PATCH (top band, rotated)
++    addPiece(tour, 0, j, rotate180(SequenceP40));
++    j += 40;
++  }
++  while (j < width-8) {
++    addPiece(tour, 0, j, rotate180(Sequence1));
++    j += 8;
++  }
++  switch(TRHeight) {
++    case 5: addPiece(tour, 0, width-6, rotate180(CornerVMatchHeight5));
++      break;
++    case 6: addPiece(tour, 0, width-8, rotate180(CornerVMatchHeight6));
++      break;
++    case 7: addPiece(tour, 0, width-10, rotate180(CornerVMatchHeight7));
++      break;
++    case 8: addPiece(tour, 0, width-12, rotate180(CornerVMatchHeight8));
++      break;
++    default: alert("bug");
++  }
++
++  return tour;
++}
++
+ function flipCell(cell) {
+   if (cell == 'xx') return 'xx';
+   res = [0,0];
+@@ -416,24 +611,10 @@
+ }
+ 
+ function changeBoardSize() {
+-
+   let width = parseInt(document.getElementById('newwidth').value);
+   let height = parseInt(document.getElementById('newheight').value);
+-  console.log("Generating tour for width = " + width + " height = " + height);
+-  let tour = genTour(width, height);
+-  if (tour === undefined) return;
+-  if (validateTour(tour)) {
+-    console.log("Validated tour");
+-    CS.tour = tour;
+-    CS.valid = false;
+-    setTurnCount(numTurns(tour),tour.length);
+-    setCrossingCount(numCrossings(tour),tour.length);
+-  }
+-  else {
+-    CS.tour = tour;
+-    CS.valid = false;
+-    alert('incorrect tour');
+-  }
++  if (isNaN(width) || isNaN(height)) return;
++  refreshBoth(width, height);
+ }
+ 
+ function numTurns(tour) {
