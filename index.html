@@ -27,12 +27,13 @@ This fork adds the SequenceP_40 patch.
 <style>
 body { padding-top: 0px; font-family: sans-serif; }
 
-.flex-container {
+.boards-row {
   display: flex;
   flex-direction: row;
+  justify-content: center;
   align-items: top;
   padding: 20px;
-  gap: 20px;
+  gap: 30px;
   flex-wrap: wrap;
 }
 
@@ -51,9 +52,13 @@ body { padding-top: 0px; font-family: sans-serif; }
   font-size: 14px;
 }
 
-.controls {
-  margin-top: 30px;
-  min-width: 260px;
+.controls-row {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  gap: 30px;
+  padding: 8px 20px;
+  flex-wrap: wrap;
 }
 
 .control {
@@ -63,6 +68,14 @@ body { padding-top: 0px; font-family: sans-serif; }
 }
 
 .control label { margin-right: 6px; }
+
+.description {
+  max-width: 760px;
+  margin: 20px auto;
+  padding: 0 20px;
+  font-size: 14px;
+  line-height: 1.55;
+}
 
 .w3-top { position: fixed; top: 0; width: 100%; }
 </style>
@@ -83,11 +96,12 @@ body { padding-top: 0px; font-family: sans-serif; }
   </div>
 </div>
 
-<div class="flex-container">
+<!-- Chessboards on top -->
+<div class="boards-row">
 
   <div class="canvas-block">
     <div class="canvas-title"><b>BJMOW original</b></div>
-    <canvas id="canvas_orig" width="500" height="500"
+    <canvas id="canvas_orig" width="700" height="700"
             style="border: 1px solid #ccc;">
       Your browser does not support HTML5 canvas.
     </canvas>
@@ -99,7 +113,7 @@ body { padding-top: 0px; font-family: sans-serif; }
 
   <div class="canvas-block">
     <div class="canvas-title"><b>With SequenceP_40 patch</b></div>
-    <canvas id="canvas_patched" width="500" height="500"
+    <canvas id="canvas_patched" width="700" height="700"
             style="border: 1px solid #ccc;">
       Your browser does not support HTML5 canvas.
     </canvas>
@@ -109,38 +123,38 @@ body { padding-top: 0px; font-family: sans-serif; }
     </div>
   </div>
 
-  <div class="controls">
-    <div class="control">
-      <form><label>Width:</label>
-        <input type="number" min="16" max="240" step="2" value="100"
-               id="newwidth" onchange="changeBoardSize()"
-               onclick="changeBoardSize()">
-      </form>
-    </div>
-    <div class="control">
-      <form><label>Height:</label>
-        <input type="number" min="12" max="240" step="1" value="100"
-               id="newheight" onchange="changeBoardSize()"
-               onclick="changeBoardSize()">
-      </form>
-    </div>
-    <p style="font-size:13px; line-height:1.5; max-width:240px;">
-      <b>Left:</b> BJMOW Algorithm 1
-      (<a href="https://arxiv.org/abs/1904.02824">Besa et al., 2022</a>).
-      <br>
-      <b>Right:</b> the same algorithm with a single-element patch
-      in this fork: five adjacent $4\times8$ <code>Sequence1</code>
-      heel templates are replaced, in groups of five, by a single
-      $4\times40$ <code>SequenceP_40</code> template found by
-      CP-SAT search.
-      <br>
-      The red rectangles on the right canvas mark the
-      <b>only cells that differ</b> between the two tours;
-      everything outside them is bit-for-bit identical.
-      Try $n = 80, 120, 160$ to see the saving grow.
-    </p>
-  </div>
+</div>
 
+<!-- Controls below the boards -->
+<div class="controls-row">
+  <div class="control">
+    <form><label>Width:</label>
+      <input type="number" min="16" max="240" step="2" value="100"
+             id="newwidth" onchange="changeBoardSize()"
+             onclick="changeBoardSize()">
+    </form>
+  </div>
+  <div class="control">
+    <form><label>Height:</label>
+      <input type="number" min="12" max="240" step="1" value="100"
+             id="newheight" onchange="changeBoardSize()"
+             onclick="changeBoardSize()">
+    </form>
+  </div>
+</div>
+
+<!-- Description -->
+<div class="description">
+  <p><b>Left:</b> BJMOW Algorithm&nbsp;1
+    (<a href="https://arxiv.org/abs/1904.02824">Besa et al., 2022</a>).
+    <b>Right:</b> the same algorithm with a single-element patch in this
+    fork: five adjacent $4\times8$ <code>Sequence1</code> heel templates
+    are replaced, in groups of five, by a single $4\times40$
+    <code>SequenceP_40</code> template found by CP-SAT search.
+    The red rectangles on the right canvas mark the
+    <b>only cells that differ</b> between the two tours; everything
+    outside them is bit-for-bit identical. Try $n = 80, 120, 160$ to
+    see the saving grow.</p>
 </div>
 
 <script src="board.js"></script>

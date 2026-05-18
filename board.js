@@ -5,7 +5,7 @@
 //X grows to the right and Y grows upwards(?)
 var canvasSize = (document.getElementById('canvas_orig') || document.getElementById('canvas1')).offsetWidth-2;
 var canvasOffset = 1;
-var maxCanvasSize = canvasSize;   //fit drawing to the actual canvas width
+var maxCanvasSize = canvasSize - 2*canvasOffset;   //leave room for the 1-px offset on each side
 var maxCellSize = 30;
 
 //HTML canvas coordinate system:
@@ -128,13 +128,12 @@ var flippedSequence3 = [ //delete if not used
 
 
 
-function CanvasState(canvas, tourFn, label) {
+function CanvasState(canvas, tourFn) {
 
   // **** First some setup! ****
   this.canvas = canvas;
-  this.tourFn = tourFn || genTour;   //LI 2026: which algorithm
-  this.label = label || '';          //LI 2026: label shown on canvas
-  this.patchRegions = [];            //LI 2026: red rectangles overlaid on draw
+  this.tourFn = tourFn || genTour;   //which algorithm to use
+  this.patchRegions = [];            //red rectangles overlaid on draw
   this.width = canvas.width;
   this.height = canvas.height;
   this.ctx = canvas.getContext('2d');
@@ -273,10 +272,8 @@ CanvasState.prototype.draw = function() {
 ////////////////////////////////////
 
 //=== LI 2026: two canvases, one BJMOW original, one with our patch ===
-var CS_orig    = new CanvasState(document.getElementById('canvas_orig'),
-                                 genTour,        'BJMOW original');
-var CS_patched = new CanvasState(document.getElementById('canvas_patched'),
-                                 genTourPatched, 'With SequenceP_40 patch');
+var CS_orig    = new CanvasState(document.getElementById('canvas_orig'),    genTour);
+var CS_patched = new CanvasState(document.getElementById('canvas_patched'), genTourPatched);
 init();
 
 function init() {

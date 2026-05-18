@@ -1,5 +1,5 @@
 --- /tmp/MinCrossingsKnightsTour/board.js	2026-05-18 19:37:44.898185953 +0800
-+++ board.js	2026-05-18 19:59:26.339042665 +0800
++++ board.js	2026-05-18 20:03:04.117635472 +0800
 @@ -3,9 +3,9 @@
  //rest by Nil M.
  
@@ -8,7 +8,7 @@
 +var canvasSize = (document.getElementById('canvas_orig') || document.getElementById('canvas1')).offsetWidth-2;
  var canvasOffset = 1;
 -var maxCanvasSize = 700;
-+var maxCanvasSize = canvasSize;   //fit drawing to the actual canvas width
++var maxCanvasSize = canvasSize - 2*canvasOffset;   //leave room for the 1-px offset on each side
  var maxCellSize = 30;
  
  //HTML canvas coordinate system:
@@ -31,22 +31,21 @@
  var Sequence0 = [ //6x4
  '36 46 26 26 36 46',
  '36 46 23 24 36 46',
-@@ -116,10 +128,13 @@
+@@ -116,10 +128,12 @@
  
  
  
 -function CanvasState(canvas) {
-+function CanvasState(canvas, tourFn, label) {
++function CanvasState(canvas, tourFn) {
  
    // **** First some setup! ****
    this.canvas = canvas;
-+  this.tourFn = tourFn || genTour;   //LI 2026: which algorithm
-+  this.label = label || '';          //LI 2026: label shown on canvas
-+  this.patchRegions = [];            //LI 2026: red rectangles overlaid on draw
++  this.tourFn = tourFn || genTour;   //which algorithm to use
++  this.patchRegions = [];            //red rectangles overlaid on draw
    this.width = canvas.width;
    this.height = canvas.height;
    this.ctx = canvas.getContext('2d');
-@@ -141,7 +156,7 @@
+@@ -141,7 +155,7 @@
    // **** Keep track of state! ****
  
    this.valid = false; // when set to false, the canvas will redraw everything
@@ -55,7 +54,7 @@
  
    // **** Then events! ****
  
-@@ -236,6 +251,19 @@
+@@ -236,6 +250,19 @@
      }
    }
  
@@ -75,16 +74,14 @@
    // ** Add stuff you want drawn on top all the time here **
    this.valid = true;
  }
-@@ -244,15 +272,61 @@
+@@ -244,15 +271,59 @@
  //HTML interaction
  ////////////////////////////////////
  
 -var CS = new CanvasState(document.getElementById('canvas1'));
 +//=== LI 2026: two canvases, one BJMOW original, one with our patch ===
-+var CS_orig    = new CanvasState(document.getElementById('canvas_orig'),
-+                                 genTour,        'BJMOW original');
-+var CS_patched = new CanvasState(document.getElementById('canvas_patched'),
-+                                 genTourPatched, 'With SequenceP_40 patch');
++var CS_orig    = new CanvasState(document.getElementById('canvas_orig'),    genTour);
++var CS_patched = new CanvasState(document.getElementById('canvas_patched'), genTourPatched);
  init();
  
  function init() {
@@ -142,7 +139,7 @@
  
  //Algorithm 1 in the paper
  function genTour(width, height) {
-@@ -361,6 +435,122 @@
+@@ -361,6 +432,122 @@
    return tour;
  }
  
@@ -265,7 +262,7 @@
  function flipCell(cell) {
    if (cell == 'xx') return 'xx';
    res = [0,0];
-@@ -416,24 +606,10 @@
+@@ -416,24 +603,10 @@
  }
  
  function changeBoardSize() {
