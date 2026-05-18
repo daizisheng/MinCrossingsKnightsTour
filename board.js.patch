@@ -1,11 +1,11 @@
 --- /tmp/MinCrossingsKnightsTour/board.js	2026-05-18 19:37:44.898185953 +0800
-+++ board.js	2026-05-18 20:03:04.117635472 +0800
++++ board.js	2026-05-18 20:10:24.787376522 +0800
 @@ -3,9 +3,9 @@
  //rest by Nil M.
  
  //X grows to the right and Y grows upwards(?)
 -var canvasSize = document.getElementById('canvas1').offsetWidth-2;
-+var canvasSize = (document.getElementById('canvas_orig') || document.getElementById('canvas1')).offsetWidth-2;
++var canvasSize = (document.getElementById('canvas_main') || document.getElementById('canvas1')).offsetWidth-2;
  var canvasOffset = 1;
 -var maxCanvasSize = 700;
 +var maxCanvasSize = canvasSize - 2*canvasOffset;   //leave room for the 1-px offset on each side
@@ -31,115 +31,164 @@
  var Sequence0 = [ //6x4
  '36 46 26 26 36 46',
  '36 46 23 24 36 46',
-@@ -116,10 +128,12 @@
- 
- 
- 
--function CanvasState(canvas) {
-+function CanvasState(canvas, tourFn) {
+@@ -120,6 +132,9 @@
  
    // **** First some setup! ****
    this.canvas = canvas;
-+  this.tourFn = tourFn || genTour;   //which algorithm to use
-+  this.patchRegions = [];            //red rectangles overlaid on draw
++  this.highlightEdges = new Set(); //canonical edge keys to highlight in colour
++  this.highlightColor = '#cc0000'; //red by default
++  this.patchRegions = [];          //red rectangles overlaid on draw
    this.width = canvas.width;
    this.height = canvas.height;
    this.ctx = canvas.getContext('2d');
-@@ -141,7 +155,7 @@
+@@ -141,7 +156,7 @@
    // **** Keep track of state! ****
  
    this.valid = false; // when set to false, the canvas will redraw everything
 -  this.tour = genTour(30, 30);
-+  this.tour = this.tourFn(100, 100);
++  this.tour = genTourPatched(100, 100);  //default initial tour
  
    // **** Then events! ****
  
-@@ -236,6 +250,19 @@
+@@ -211,28 +226,31 @@
+ 
+ 
+   ctx.fillStyle = 'black';
+-  ctx.lineWidth = 1;
+-  // draw all cells
++  // draw vertices (small dots at cell centers)
+   for (let i = 0; i < height; i++) {
+     for (let j = 0; j < width; j++) {
+-      //draw vertex
+       ctx.beginPath();
+-      let nodeRadius = 2;
+-      ctx.arc(xPos(j, width, canvasJSize), yPos(i, height, canvasISize), nodeRadius, 0, Math.PI * 2, true);
++      ctx.arc(xPos(j, width, canvasJSize), yPos(i, height, canvasISize),
++              2, 0, Math.PI * 2, true);
+       ctx.fill();
+-
++    }
++  }
++  // draw edges; differing edges in highlightColor, the rest in dark blue
++  for (let i = 0; i < height; i++) {
++    for (let j = 0; j < width; j++) {
+       let moves = tour[i][j];
+-      let i1 = i+movesI[moves[0]];
+-      let j1 = j+movesJ[moves[0]];
+-      let i2 = i+movesI[moves[1]];
+-      let j2 = j+movesJ[moves[1]];
+-      // console.log(i,j,tour[i][j],moves,i1,j1,i2,j2);
+-      ctx.beginPath();
+-      ctx.moveTo(xPos(j, width, canvasJSize), yPos(i, height, canvasISize));
+-      ctx.lineTo(xPos(j1, width, canvasJSize), yPos(i1, height, canvasISize));
+-      ctx.moveTo(xPos(j, width, canvasJSize), yPos(i, height, canvasISize));
+-      ctx.lineTo(xPos(j2, width, canvasJSize), yPos(i2, height, canvasISize));
+-      ctx.stroke();
++      for (let k = 0; k < 2; k++) {
++        let m = parseInt(moves[k]);
++        let i2 = i + movesI[m], j2 = j + movesJ[m];
++        let key = canonicalEdgeKey(i, j, i2, j2);
++        let isDiff = this.highlightEdges.has(key);
++        ctx.beginPath();
++        ctx.moveTo(xPos(j,  width, canvasJSize), yPos(i,  height, canvasISize));
++        ctx.lineTo(xPos(j2, width, canvasJSize), yPos(i2, height, canvasISize));
++        ctx.strokeStyle = isDiff ? this.highlightColor : '#1a4480';
++        ctx.lineWidth   = isDiff ? 2.4              : 0.9;
++        ctx.stroke();
++      }
      }
    }
  
-+
-+  // === PATCH: draw red overlays on patch regions ===
-+  ctx.strokeStyle = '#cc0000';
-+  ctx.lineWidth = 3;
-+  for (let r of this.patchRegions) {
-+    let x0 = canvasOffset + canvasCellSize * r.j0;
-+    let y0 = canvasOffset + canvasCellSize * r.i0;
-+    let w0 = canvasCellSize * (r.j1 - r.j0 + 1);
-+    let h0 = canvasCellSize * (r.i1 - r.i0 + 1);
-+    ctx.strokeRect(x0, y0, w0, h0);
-+  }
-+  // === END PATCH OVERLAY ===
-+
-   // ** Add stuff you want drawn on top all the time here **
-   this.valid = true;
- }
-@@ -244,15 +271,59 @@
+@@ -244,15 +262,84 @@
  //HTML interaction
  ////////////////////////////////////
  
 -var CS = new CanvasState(document.getElementById('canvas1'));
-+//=== LI 2026: two canvases, one BJMOW original, one with our patch ===
-+var CS_orig    = new CanvasState(document.getElementById('canvas_orig'),    genTour);
-+var CS_patched = new CanvasState(document.getElementById('canvas_patched'), genTourPatched);
++//=== Single canvas + checkbox to toggle BJMOW vs patched ===
++//=== Edges that differ between the two are drawn in red (patched) or green (orig). ===
++var CS = new CanvasState(document.getElementById('canvas_main'));
++var lastTourOrig = null, lastTourPatched = null;
++var lastOnlyPatched = new Set();   //edges in patched tour only
++var lastOnlyOrig    = new Set();   //edges in original tour only
  init();
  
  function init() {
--  CS.valid = false;
++  refresh(100);
++}
++
++function refresh(n) {
++  let to = genTour(n, n);
++  let tp = genTourPatched(n, n);
++  if (to === undefined || tp === undefined) return;
++  lastTourOrig    = to;
++  lastTourPatched = tp;
++  let eo = tourEdges(to), ep = tourEdges(tp);
++  lastOnlyPatched = new Set([...ep].filter(x => !eo.has(x)));
++  lastOnlyOrig    = new Set([...eo].filter(x => !ep.has(x)));
++  applyMode();
++}
++
++function applyMode() {
++  let usePatch = document.getElementById('usePatch').checked;
++  if (usePatch) {
++    CS.tour = lastTourPatched;
++    CS.highlightEdges = lastOnlyPatched;
++    CS.highlightColor = '#cc0000'; //red = SequenceP_40 internal edges
++  } else {
++    CS.tour = lastTourOrig;
++    CS.highlightEdges = lastOnlyOrig;
++    CS.highlightColor = '#1aa01a'; //green = Sequence1 edges that the patch replaces
++  }
+   CS.valid = false;
 -  let tour = genTour(30, 30);
 -  setTurnCount(numTurns(tour),tour.length);
 -  setCrossingCount(numCrossings(tour),tour.length);
-+  refreshBoth(100, 100);
++  let xo = numCrossings(lastTourOrig);
++  let xp = numCrossings(lastTourPatched);
++  let cur = usePatch ? xp : xo;
++  let saving = xo - xp;
++  setLabelById('crossingcount',
++    'Crossings: ' + cur +
++    (usePatch
++       ? '  \u2014 patched tour (saving ' + saving + ' over BJMOW = ' + xo + ')'
++       : '  \u2014 BJMOW tour (' + saving + ' more than patched = ' + xp + ')'));
++  setLabelById('turncount',
++    'Turns: ' + numTurns(usePatch ? lastTourPatched : lastTourOrig));
 +}
 +
-+function refreshBoth(width, height) {
-+  let to = CS_orig.tourFn(width, height);
-+  let tp = CS_patched.tourFn(width, height);
-+  if (to === undefined || tp === undefined) return;
-+  CS_orig.tour = to;
-+  CS_orig.patchRegions = [];
-+  CS_orig.valid = false;
-+  CS_patched.tour = tp;
-+  CS_patched.patchRegions = getPatchRegions(width, height);
-+  CS_patched.valid = false;
-+  let xo = numCrossings(to), xp = numCrossings(tp);
-+  setLabelById('crossingcount_orig',
-+               'Crossings: ' + xo + '  (BJMOW default heel = 13n+\u03B4)');
-+  setLabelById('crossingcount_patched',
-+               'Crossings: ' + xp + '  (saving ' + (xo - xp) + ' vs BJMOW)');
-+  setLabelById('turncount_orig',    'Turns: ' + numTurns(to));
-+  setLabelById('turncount_patched', 'Turns: ' + numTurns(tp));
-+}
++function changeMode() { applyMode(); }
 +
 +function setLabelById(id, text) {
 +  let el = document.getElementById(id);
 +  if (el) el.innerHTML = text;
 +}
 +
-+function getPatchRegions(width, height) {
-+  if (width < 50 || height < 12) return [];
-+  let regions = [];
-+  let BRSeq = (width / 2 + 2) % 4;
-+  let TLSeq = (((3 - height) % 4) + 4) % 4;
-+  let finalj_bot = [width-6, width-8, width-10, width-4][BRSeq];
-+  let start_top  = [6, 8, 10, 4][TLSeq];
-+  let j = 6;
-+  while (j + 40 <= finalj_bot) {
-+    regions.push({i0: height-4, i1: height-1, j0: j, j1: j+39});
-+    j += 40;
++//canonical edge key for an unordered pair of cells.
++function canonicalEdgeKey(i1, j1, i2, j2) {
++  if (i1 < i2 || (i1 === i2 && j1 < j2))
++    return i1 + ',' + j1 + '-' + i2 + ',' + j2;
++  return i2 + ',' + j2 + '-' + i1 + ',' + j1;
++}
++
++function tourEdges(tour) {
++  let edges = new Set();
++  let h = tour.length, w = tour[0].length;
++  for (let i = 0; i < h; i++) {
++    for (let j = 0; j < w; j++) {
++      let moves = tour[i][j];
++      for (let k = 0; k < 2; k++) {
++        let m = parseInt(moves[k]);
++        edges.add(canonicalEdgeKey(i, j, i + movesI[m], j + movesJ[m]));
++      }
++    }
 +  }
-+  j = start_top;
-+  while (j + 40 <= width - 8) {
-+    regions.push({i0: 0, i1: 3, j0: j, j1: j+39});
-+    j += 40;
-+  }
-+  return regions;
++  return edges;
  }
-+//=== END LI 2026 init block ===
++//=== END single-canvas block ===
  
  //Algorithm 1 in the paper
  function genTour(width, height) {
-@@ -361,6 +432,122 @@
+@@ -361,6 +448,122 @@
    return tour;
  }
  
@@ -262,13 +311,13 @@
  function flipCell(cell) {
    if (cell == 'xx') return 'xx';
    res = [0,0];
-@@ -416,24 +603,10 @@
+@@ -416,24 +619,9 @@
  }
  
  function changeBoardSize() {
 -
-   let width = parseInt(document.getElementById('newwidth').value);
-   let height = parseInt(document.getElementById('newheight').value);
+-  let width = parseInt(document.getElementById('newwidth').value);
+-  let height = parseInt(document.getElementById('newheight').value);
 -  console.log("Generating tour for width = " + width + " height = " + height);
 -  let tour = genTour(width, height);
 -  if (tour === undefined) return;
@@ -284,8 +333,48 @@
 -    CS.valid = false;
 -    alert('incorrect tour');
 -  }
-+  if (isNaN(width) || isNaN(height)) return;
-+  refreshBoth(width, height);
++  let n = parseInt(document.getElementById('newn').value);
++  if (isNaN(n)) return;
++  refresh(n);
  }
  
  function numTurns(tour) {
+@@ -585,3 +773,38 @@
+ 
+ 
+ 
++
++//=== Sweep table: n = 80, 90, ..., 1000 ===
++function renderSweepTable() {
++  let wrap = document.getElementById('sweep-table-wrap');
++  if (!wrap) return;
++  let html = '<table><thead><tr>';
++  html += '<th>$n$</th><th>$\\chi(\\textsc{Gen}(n,n))$<br>(BJMOW)</th>';
++  html += '<th>$\\chi(T_n)$<br>(patched)</th>';
++  html += '<th>saving</th>';
++  html += '<th>$\\chi(T_n)/n$</th>';
++  html += '<th>$\\chi(T_n) - 11.5\\, n$</th>';
++  html += '</tr></thead><tbody>';
++  for (let n = 80; n <= 1000; n += 10) {
++    let to = genTour(n, n);
++    let tp = genTourPatched(n, n);
++    if (!to || !tp) continue;
++    let xo = numCrossings(to);
++    let xp = numCrossings(tp);
++    let saving = xo - xp;
++    let ratio = (xp / n).toFixed(4);
++    let residual = (xp - 11.5 * n).toFixed(1);
++    html += '<tr>';
++    html += '<td>' + n + '</td>';
++    html += '<td>' + xo + '</td>';
++    html += '<td>' + xp + '</td>';
++    html += '<td class="saving">' + saving + '</td>';
++    html += '<td>' + ratio + '</td>';
++    html += '<td>' + residual + '</td>';
++    html += '</tr>';
++  }
++  html += '</tbody></table>';
++  wrap.innerHTML = html;
++  if (window.MathJax && MathJax.Hub) MathJax.Hub.Queue(['Typeset', MathJax.Hub, wrap]);
++}
++renderSweepTable();

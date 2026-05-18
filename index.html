@@ -1,6 +1,7 @@
 <!--
 Interactive visualisation of BJMOW's knight's tour algorithm and a
-patched variant, side by side.
+patched variant. Toggle the checkbox to switch between them; the
+edges that differ between the two tours are highlighted.
 
 Original by Nil Mamano (https://github.com/nmamano/MinCrossingsKnightsTour)
 This fork adds the SequenceP_40 patch.
@@ -27,27 +28,14 @@ This fork adds the SequenceP_40 patch.
 <style>
 body { padding-top: 0px; font-family: sans-serif; }
 
-.boards-row {
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-  align-items: top;
-  padding: 20px;
-  gap: 30px;
-  flex-wrap: wrap;
-}
-
-.canvas-block {
+.board-area {
   display: flex;
   flex-direction: column;
   align-items: center;
+  padding: 20px;
 }
 
-.canvas-block .canvas-title {
-  margin-bottom: 6px;
-  font-size: 15px;
-}
-.canvas-block .canvas-label {
+.canvas-label {
   margin-top: 6px;
   font-size: 14px;
 }
@@ -61,12 +49,7 @@ body { padding-top: 0px; font-family: sans-serif; }
   flex-wrap: wrap;
 }
 
-.control {
-  display: flex;
-  align-items: center;
-  padding: 4px 0;
-}
-
+.control { display: flex; align-items: center; padding: 4px 0; }
 .control label { margin-right: 6px; }
 
 .description {
@@ -76,6 +59,24 @@ body { padding-top: 0px; font-family: sans-serif; }
   font-size: 14px;
   line-height: 1.55;
 }
+
+.sweep-section {
+  max-width: 980px;
+  margin: 10px auto 40px;
+  padding: 0 20px;
+}
+.sweep-section table {
+  border-collapse: collapse;
+  margin: 0 auto;
+  font-size: 13px;
+}
+.sweep-section th, .sweep-section td {
+  border: 1px solid #ddd;
+  padding: 4px 10px;
+  text-align: right;
+}
+.sweep-section th { background: #f5f5f5; }
+.sweep-section td.saving { color: #cc0000; font-weight: bold; }
 
 .w3-top { position: fixed; top: 0; width: 100%; }
 </style>
@@ -88,73 +89,69 @@ body { padding-top: 0px; font-family: sans-serif; }
 <div class="w3-card">
   <div class="w3-bar w3-white w3-wide w3-padding w3-card">
     <a href="#home" class="w3-bar-item w3-button">
-      <b>Taming the Knight's Tour:</b> BJMOW algorithm vs.\ SequenceP_40 patch
+      <b>Taming the Knight's Tour:</b> BJMOW algorithm vs. SequenceP_40 patch
     </a>
-    <div class="w3-right w3-hide-small">
-      <a href="#about" class="w3-bar-item w3-button">About</a>
-    </div>
   </div>
 </div>
 
-<!-- Chessboards on top -->
-<div class="boards-row">
-
-  <div class="canvas-block">
-    <div class="canvas-title"><b>BJMOW original</b></div>
-    <canvas id="canvas_orig" width="700" height="700"
-            style="border: 1px solid #ccc;">
-      Your browser does not support HTML5 canvas.
-    </canvas>
-    <div class="canvas-label">
-      <span id="turncount_orig">Turns: </span> &middot;
-      <span id="crossingcount_orig">Crossings: </span>
-    </div>
+<!-- One canvas, toggled by checkbox -->
+<div class="board-area">
+  <canvas id="canvas_main" width="700" height="700"
+          style="border: 1px solid #ccc;">
+    Your browser does not support HTML5 canvas.
+  </canvas>
+  <div class="canvas-label">
+    <span id="turncount">Turns: </span> &middot;
+    <span id="crossingcount">Crossings: </span>
   </div>
-
-  <div class="canvas-block">
-    <div class="canvas-title"><b>With SequenceP_40 patch</b></div>
-    <canvas id="canvas_patched" width="700" height="700"
-            style="border: 1px solid #ccc;">
-      Your browser does not support HTML5 canvas.
-    </canvas>
-    <div class="canvas-label">
-      <span id="turncount_patched">Turns: </span> &middot;
-      <span id="crossingcount_patched">Crossings: </span>
-    </div>
-  </div>
-
 </div>
 
-<!-- Controls below the boards -->
+<!-- Controls -->
 <div class="controls-row">
   <div class="control">
-    <form><label>Width:</label>
-      <input type="number" min="16" max="240" step="2" value="100"
-             id="newwidth" onchange="changeBoardSize()"
+    <form><label>$n$ (board is $n \times n$, 80–120):</label>
+      <input type="number" min="80" max="120" step="2" value="100"
+             id="newn" onchange="changeBoardSize()"
              onclick="changeBoardSize()">
     </form>
   </div>
   <div class="control">
-    <form><label>Height:</label>
-      <input type="number" min="12" max="240" step="1" value="100"
-             id="newheight" onchange="changeBoardSize()"
-             onclick="changeBoardSize()">
-    </form>
+    <label>
+      <input type="checkbox" id="usePatch" checked
+             onchange="changeMode()">
+      Use <code>SequenceP_40</code> patch
+      <span style="color:#888"> (uncheck for BJMOW original)</span>
+    </label>
   </div>
+</div>
+
+<!-- Sweep table: n = 80, 90, ..., 1000 -->
+<div class="sweep-section">
+  <h3 style="text-align:center; margin-top:24px;">
+    Crossing counts for $n = 80, 90, \ldots, 1000$
+  </h3>
+  <div id="sweep-table-wrap"></div>
 </div>
 
 <!-- Description -->
 <div class="description">
-  <p><b>Left:</b> BJMOW Algorithm&nbsp;1
-    (<a href="https://arxiv.org/abs/1904.02824">Besa et al., 2022</a>).
-    <b>Right:</b> the same algorithm with a single-element patch in this
-    fork: five adjacent $4\times8$ <code>Sequence1</code> heel templates
-    are replaced, in groups of five, by a single $4\times40$
-    <code>SequenceP_40</code> template found by CP-SAT search.
-    The red rectangles on the right canvas mark the
-    <b>only cells that differ</b> between the two tours; everything
-    outside them is bit-for-bit identical. Try $n = 80, 120, 160$ to
-    see the saving grow.</p>
+  <p>This page visualises the closed knight's tour produced by
+    BJMOW Algorithm&nbsp;1
+    (<a href="https://arxiv.org/abs/1904.02824">Besa et al., 2022</a>),
+    optionally patched: five adjacent $4\times8$ <code>Sequence1</code>
+    heel templates are replaced, in groups of five, by a single
+    $4\times40$ <code>SequenceP_40</code> template found by CP-SAT
+    search.</p>
+  <p>Toggle the checkbox to switch between the two tours.
+    Edges that <b>differ</b> between BJMOW's tour and the patched
+    tour are drawn in colour:
+    <b style="color:#cc0000">red</b> when viewing the patched tour
+    (these are the new edges contributed by <code>SequenceP_40</code>)
+    and <b style="color:#1aa01a">green</b> when viewing the BJMOW
+    tour (these are the <code>Sequence1</code> edges that the patch
+    replaces).  All other edges (the vast majority, drawn in dark
+    blue) are bit-for-bit identical between the two tours.
+    Try $n = 80, 120, 160$ to see the difference region grow.</p>
 </div>
 
 <script src="board.js"></script>
