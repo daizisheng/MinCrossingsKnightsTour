@@ -252,7 +252,7 @@ CanvasState.prototype.draw = function() {
   }
 
 
-  // === LI 2026 PATCH: draw red overlays on patch regions ===
+  // === PATCH: draw red overlays on patch regions ===
   ctx.strokeStyle = '#cc0000';
   ctx.lineWidth = 3;
   for (let r of this.patchRegions) {
@@ -261,11 +261,6 @@ CanvasState.prototype.draw = function() {
     let w0 = canvasCellSize * (r.j1 - r.j0 + 1);
     let h0 = canvasCellSize * (r.i1 - r.i0 + 1);
     ctx.strokeRect(x0, y0, w0, h0);
-  }
-  if (this.label) {
-    ctx.fillStyle = '#222';
-    ctx.font = 'bold 16px sans-serif';
-    ctx.fillText(this.label, 10, 22);
   }
   // === END PATCH OVERLAY ===
 

@@ -1,5 +1,5 @@
 --- /tmp/MinCrossingsKnightsTour/board.js	2026-05-18 19:37:44.898185953 +0800
-+++ /tmp/MinCrossingsKnightsTour-fork/board.js	2026-05-18 19:57:30.358622940 +0800
++++ board.js	2026-05-18 19:58:26.780950117 +0800
 @@ -3,9 +3,9 @@
  //rest by Nil M.
  
@@ -55,12 +55,12 @@
  
    // **** Then events! ****
  
-@@ -236,6 +251,24 @@
+@@ -236,6 +251,19 @@
      }
    }
  
 +
-+  // === LI 2026 PATCH: draw red overlays on patch regions ===
++  // === PATCH: draw red overlays on patch regions ===
 +  ctx.strokeStyle = '#cc0000';
 +  ctx.lineWidth = 3;
 +  for (let r of this.patchRegions) {
@@ -70,17 +70,12 @@
 +    let h0 = canvasCellSize * (r.i1 - r.i0 + 1);
 +    ctx.strokeRect(x0, y0, w0, h0);
 +  }
-+  if (this.label) {
-+    ctx.fillStyle = '#222';
-+    ctx.font = 'bold 16px sans-serif';
-+    ctx.fillText(this.label, 10, 22);
-+  }
 +  // === END PATCH OVERLAY ===
 +
    // ** Add stuff you want drawn on top all the time here **
    this.valid = true;
  }
-@@ -244,15 +277,61 @@
+@@ -244,15 +272,61 @@
  //HTML interaction
  ////////////////////////////////////
  
@@ -147,7 +142,7 @@
  
  //Algorithm 1 in the paper
  function genTour(width, height) {
-@@ -361,6 +440,122 @@
+@@ -361,6 +435,122 @@
    return tour;
  }
  
@@ -270,7 +265,7 @@
  function flipCell(cell) {
    if (cell == 'xx') return 'xx';
    res = [0,0];
-@@ -416,24 +611,10 @@
+@@ -416,24 +606,10 @@
  }
  
  function changeBoardSize() {
