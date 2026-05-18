@@ -1,5 +1,5 @@
---- /tmp/MinCrossingsKnightsTour/board.js	2026-05-18 19:37:44.898185953 +0800
-+++ board.js	2026-05-18 20:27:52.668859488 +0800
+--- /tmp/upstream_board.js	2026-05-18 21:47:25.448534911 +0800
++++ board.js	2026-05-18 21:41:50.286864727 +0800
 @@ -3,9 +3,9 @@
  //rest by Nil M.
  
@@ -12,15 +12,36 @@
  var maxCellSize = 30;
  
  //HTML canvas coordinate system:
-@@ -86,6 +86,18 @@
+@@ -80,12 +80,38 @@
+ '02 27',
+ '02 27'];
+ 
+-var Sequence1 = [ //8x4 (heel)
++// BJMOW Sequence1 (default heel, 32 crossings per slot, 13n total).
++// Kept for reference; not used in this fork's gen_tour.
++var Sequence1Default = [ //8x4 (heel)
+ '36 46 26 26 26 26 xx xx',
+ '36 46 23 24 26 26 36 46',
  '02 27 25 25 26 26 56 56',
  '01 17 06 67 16 16 06 67'];
  
++// Optimised heel that realises BJMOW's claimed 12n bound (Besa et al. 2022,
++// Section 4.2.2). 28 crossings per slot, drop-in replacement for Sequence1:
++// same cross-template interface, same path-pairing through K consecutive
++// heels. Independently rediscovered here by CP-SAT (proven optimal under
++// the Sequence1 interface lock). Used as the BASELINE for this demo.
++var Sequence1 = [ //8x4 (heel) — BJMOW 12n optimised
++'26 26 26 26 26 26 26 26',
++'36 46 56 56 26 26 36 46',
++'12 12 25 25 25 25 56 56',
++'01 17 16 16 16 16 06 67'];
++
 +//=== PATCH ADDITION: SequenceP_40 template ===
-+//4 x 40 pairing-preserving template found by CP-SAT search.
-+//Replaces 5 adjacent Sequence1's; saves 30 crossings per substitution.
++//4 x 40 pairing-preserving template found by CP-SAT search. Replaces 5
++//adjacent BJMOW-optimised heels (Sequence1 above), saving 10 crossings
++//per substitution on top of the 12n baseline (or 30 vs. the 13n default).
 +//Cross-boundary edges, boundary endpoints, and internal-path pairing
-+//all match 5 x Sequence1*, so BJMOW Theorem 2 applies verbatim.
++//all match the run of 5 heels, so BJMOW Theorem 2 applies verbatim.
 +var SequenceP40 = [ //40 x 4
 +'26 26 26 26 36 26 26 26 26 26 26 36 36 36 36 26 36 26 26 26 36 26 26 26 26 26 26 36 36 36 36 26 36 26 26 26 26 26 26 26',
 +'36 46 56 56 26 26 23 46 46 46 46 56 56 45 34 34 34 36 23 26 26 26 23 46 46 46 46 56 56 45 34 34 34 36 23 26 26 26 36 46',
@@ -31,7 +52,7 @@
  var Sequence0 = [ //6x4
  '36 46 26 26 36 46',
  '36 46 23 24 36 46',
-@@ -120,6 +132,7 @@
+@@ -120,6 +146,7 @@
  
    // **** First some setup! ****
    this.canvas = canvas;
@@ -39,7 +60,7 @@
    this.width = canvas.width;
    this.height = canvas.height;
    this.ctx = canvas.getContext('2d');
-@@ -141,7 +154,7 @@
+@@ -141,7 +168,7 @@
    // **** Keep track of state! ****
  
    this.valid = false; // when set to false, the canvas will redraw everything
@@ -48,7 +69,7 @@
  
    // **** Then events! ****
  
-@@ -179,7 +192,8 @@
+@@ -179,7 +206,8 @@
    var tour = this.tour;
    var height = tour.length;
    var width = tour[0].length;
@@ -58,7 +79,7 @@
    let canvasISize = canvasCellSize*height;
    let canvasJSize = canvasCellSize*width;
    this.resize(canvasISize, canvasJSize);
-@@ -211,31 +225,43 @@
+@@ -211,31 +239,43 @@
  
  
    ctx.fillStyle = 'black';
@@ -119,7 +140,7 @@
    // ** Add stuff you want drawn on top all the time here **
    this.valid = true;
  }
-@@ -244,15 +270,104 @@
+@@ -244,15 +284,104 @@
  //HTML interaction
  ////////////////////////////////////
  
@@ -228,7 +249,7 @@
  
  //Algorithm 1 in the paper
  function genTour(width, height) {
-@@ -361,6 +476,122 @@
+@@ -361,6 +490,122 @@
    return tour;
  }
  
@@ -351,7 +372,7 @@
  function flipCell(cell) {
    if (cell == 'xx') return 'xx';
    res = [0,0];
-@@ -416,24 +647,9 @@
+@@ -416,24 +661,9 @@
  }
  
  function changeBoardSize() {
