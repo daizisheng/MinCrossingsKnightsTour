@@ -156,7 +156,7 @@ function CanvasState(canvas, tourFn, label) {
   // **** Keep track of state! ****
 
   this.valid = false; // when set to false, the canvas will redraw everything
-  this.tour = this.tourFn(30, 30);
+  this.tour = this.tourFn(100, 100);
 
   // **** Then events! ****
 
@@ -280,7 +280,7 @@ var CS_patched = new CanvasState(document.getElementById('canvas_patched'),
 init();
 
 function init() {
-  refreshBoth(30, 30);
+  refreshBoth(100, 100);
 }
 
 function refreshBoth(width, height) {

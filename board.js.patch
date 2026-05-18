@@ -1,5 +1,5 @@
 --- /tmp/MinCrossingsKnightsTour/board.js	2026-05-18 19:37:44.898185953 +0800
-+++ board.js	2026-05-18 19:58:26.780950117 +0800
++++ board.js	2026-05-18 19:59:26.339042665 +0800
 @@ -3,9 +3,9 @@
  //rest by Nil M.
  
@@ -51,7 +51,7 @@
  
    this.valid = false; // when set to false, the canvas will redraw everything
 -  this.tour = genTour(30, 30);
-+  this.tour = this.tourFn(30, 30);
++  this.tour = this.tourFn(100, 100);
  
    // **** Then events! ****
  
@@ -92,7 +92,7 @@
 -  let tour = genTour(30, 30);
 -  setTurnCount(numTurns(tour),tour.length);
 -  setCrossingCount(numCrossings(tour),tour.length);
-+  refreshBoth(30, 30);
++  refreshBoth(100, 100);
 +}
 +
 +function refreshBoth(width, height) {
